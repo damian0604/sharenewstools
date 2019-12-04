@@ -1,4 +1,84 @@
 #!/usr/bin/env python3
+'''
+This command line tool takes a list of URLs of news articles as input,
+checks whether we have already retrieved its engagement scores from
+Crowdtangle, and if not, retrieves them and appends them to the output
+file.
+'''
 
-import sharenewstools
-pass
+import json
+import argparse
+import logging
+from os.path import isfile
+from sharenewstools import Crowdtangle
+
+def parse_inputfile(filename, filetype):
+    '''Read list of URLs from input file'''
+    if filetype == 'json':
+        with open(filename) as fi:
+            urls_in = json.load(fi)
+    else:
+        raise NotImplementedError
+
+    return urls_in
+
+def parse_outputfile(filename, filetype):
+    '''Read already processed URLs from output file'''
+    if filetype == 'json':
+        # assume one json object per line
+        with open(filename) as fi:
+            urls_in_outputfile = [json.loads(line).get('url') for line in fi]
+    else:
+        raise NotImplementedError
+
+    return urls_in_outputfile
+
+def append_to_outputfile(filename, filetype, data):
+    '''Append Crowdtangle data to output file'''
+    if filetype == 'json':
+        # assume one json object per line
+        with open(filename, mode='a') as f:
+            json.dump(data, f)
+            f.write('\n')
+    else:
+        raise NotImplementedError
+
+
+if __name__ == "__main__":
+    '''Provide command line interface.'''
+    parser = argparse.ArgumentParser(description='Retrieves crowdtangle'
+                                     'engagement data for a list of URLs')
+    parser.add_argument("inputfile",
+                        help="File that provides the URLs to process")
+    parser.add_argument("outputfile",
+                        help="File to which the output should be written")
+    parser.add_argument("--inputfiletype", default="json",
+                        choices=["json", "txt", "csv"])
+    parser.add_argument("--outputfiletype", default="json",
+                        choices=["json", "txt", "csv"])
+    parser.add_argument("--overwrite", action="store_true",
+                        help='Instead of appending to outputfile, overwrite it')
+    parser.add_argument("--verbose", action='store_true')
+    parser.add_argument("--token",
+                        help='Allows to specify crowdtangle token.Alternatively, it '
+                        'will be read from the environment variable CROWDTANGLETOKEN')
+    args = vars(parser.parse_args())
+    if args['verbose']:
+        logging.basicConfig(format='%(asctime)s- %(levelname)s - %(message)s', level=logging.DEBUG)
+    urls = parse_inputfile(args['inputfile'], args['inputfiletype'])
+    logging.info('{} URLs found in {}'.format(len(urls), args['inputfile']))
+
+    if args['overwrite'] is True or isfile(args['outputfile']) is False:
+        already_processed_urls = []
+        pass
+    else:
+        already_processed_urls = parse_outputfile(args['outputfile'], args['outputfiletype'])
+
+    urls_to_be_processed = [u for u in urls if not u in already_processed_urls]
+    logging.info('{} URLs still need to be processed'.format(len(urls_to_be_processed)))
+
+    myct = Crowdtangle(args['token'])
+
+    for url in urls_to_be_processed:
+        newdata = {'url': url, 'crowdtangle': myct.retrieve(url)}
+        append_to_outputfile(args['outputfile'], args['inputfiletype'], newdata)
