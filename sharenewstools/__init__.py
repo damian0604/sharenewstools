@@ -25,7 +25,7 @@ class Crowdtangle():
         '''This function makes sure that the rate limit of 2 calls per second
         is respected'''
         while (datetime.datetime.now() - self.lastcall) < datetime.timedelta(seconds=35):
-            sleep(1)
+            sleep(1.1)
         self.lastcall = datetime.datetime.now()
 
     def retrieve(self, url):
