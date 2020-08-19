@@ -55,7 +55,7 @@ class GraphAPI():
         #print(self.callsthisbatch)
         #print(datetime.datetime.now() - self.batchstart)
         if self.callsthisbatch == 198:
-            while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1):
+            while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1, minutes=2):
                 sleep(60)
                 print('Sleeping until {}'.format(self.batchstart + datetime.timedelta(hours=1)))
             self.lastcallbatch = datetime.datetime.now()
