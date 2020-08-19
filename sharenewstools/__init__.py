@@ -55,14 +55,15 @@ class GraphAPI():
         #print(self.callsthisbatch)
         #print(datetime.datetime.now() - self.batchstart)
         if self.callsthisbatch == 198:
-            while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1, minutes=2):
+            while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1, minutes=5):
                 sleep(60)
                 print('Sleeping until {}'.format(self.batchstart + datetime.timedelta(hours=1)))
-            self.lastcallbatch = datetime.datetime.now()
+            self.batchstart = datetime.datetime.now()
+            self.callsthisbatch = 0
 
     def retrieve(self, url):
         '''Retrieves engagement data for a given URL'''
-        call = self.endpoint.format(quote(url),  self.token)
+        call = self.endpoint.format(quote(url), self.token)
         self._respectlimit()
         r = requests.get(call)
         self.callsthisbatch +=1
