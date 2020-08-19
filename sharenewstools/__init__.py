@@ -46,12 +46,14 @@ class GraphAPI():
             self.token = token
         # TODO: allow for different endpoints
         self.endpoint = "https://graph.facebook.com/?id={}&fields=engagement&access_token={}"
-        self.batchstart = datetime.datetime(2000, 1, 1)
+        self.batchstart = datetime.datetime.now()
         self.callsthisbatch = 0
 
     def _respectlimit(self):
         '''This function makes sure that the rate limit of 200 calls per hour
         is respected'''
+        #print(self.callsthisbatch)
+        #print(datetime.datetime.now() - self.batchstart)
         if self.callsthisbatch == 198:
             while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1):
                 sleep(60)
