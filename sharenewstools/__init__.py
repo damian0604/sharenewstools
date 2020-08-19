@@ -35,3 +35,34 @@ class Crowdtangle():
         r = requests.get(call)
         data = r.json()
         return data
+
+class GraphAPI():
+    '''A wrapper around the Graph API that automatically respects rate
+    limits'''
+    def __init__(self, token=None):
+        if token is None:
+            self.token = environ['GRAPHAPITOKEN']
+        else:
+            self.token = token
+        # TODO: allow for different endpoints
+        self.endpoint = "https://graph.facebook.com/?id={}&fields=engagement&access_token={}"
+        self.batchstart = datetime.datetime(2000, 1, 1)
+        self.callsthisbatch = 0
+
+    def _respectlimit(self):
+        '''This function makes sure that the rate limit of 200 calls per hour
+        is respected'''
+        if self.callsthisbatch == 198:
+            while (datetime.datetime.now() - self.batchstart) < datetime.timedelta(hours=1):
+                sleep(60)
+                print('Sleeping until {}'.format(self.batchstart + datetime.timedelta(hours=1)))
+            self.lastcallbatch = datetime.datetime.now()
+
+    def retrieve(self, url):
+        '''Retrieves engagement data for a given URL'''
+        call = self.endpoint.format(quote(url),  self.token)
+        self._respectlimit()
+        r = requests.get(call)
+        self.callsthisbatch +=1
+        data = r.json()
+        return data

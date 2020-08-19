@@ -10,14 +10,13 @@ import json
 import argparse
 import logging
 from os.path import isfile
-from sharenewstools import Crowdtangle
+from sharenewstools import GraphAPI
 
 def parse_inputfile(filename, filetype):
     '''Read list of URLs from input file'''
     if filetype == 'json':
         with open(filename) as fi:
             urls_in = json.load(fi)
-    else:
     else:
         #raise NotImplementedError
         # assume one URL per line
@@ -64,8 +63,8 @@ if __name__ == "__main__":
                         help='Instead of appending to outputfile, overwrite it')
     parser.add_argument("--verbose", action='store_true')
     parser.add_argument("--token",
-                        help='Allows to specify crowdtangle token.Alternatively, it '
-                        'will be read from the environment variable CROWDTANGLETOKEN')
+                        help='Allows to specify GraphAPI token. Alternatively, it '
+                        'will be read from the environment variable GRAPHAPITOKEN')
     args = vars(parser.parse_args())
     if args['verbose']:
         logging.basicConfig(format='%(asctime)s- %(levelname)s - %(message)s', level=logging.DEBUG)
@@ -81,8 +80,8 @@ if __name__ == "__main__":
     urls_to_be_processed = [u for u in urls if not u in already_processed_urls]
     logging.info('{} URLs still need to be processed'.format(len(urls_to_be_processed)))
 
-    myct = Crowdtangle(args['token'])
+    myclient = GraphAPI(args['token'])
 
     for url in urls_to_be_processed:
-        newdata = {'url': url, 'crowdtangle': myct.retrieve(url)}
+        newdata = {'url': url, 'GraphAPI': myclient.retrieve(url)}
         append_to_outputfile(args['outputfile'], args['outputfiletype'], newdata)
