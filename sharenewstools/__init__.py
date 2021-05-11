@@ -17,6 +17,7 @@ class Crowdtangle():
         else:
             self.token = token
         # TODO: allow for different endpoints
+        # TODO: make sure that at least /posts/search is supported
         self.endpoint = "https://api.crowdtangle.com/links?link={}&startDate={}&token={}"
         self.lastcall = datetime.datetime(2000, 1, 1)
         self.startdate = startdate
