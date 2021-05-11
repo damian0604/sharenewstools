@@ -18,7 +18,6 @@ def parse_inputfile(filename, filetype):
         with open(filename) as fi:
             urls_in = json.load(fi)
     else:
-    else:
         #raise NotImplementedError
         # assume one URL per line
         with open(filename) as fi:
